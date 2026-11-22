@@ -5,15 +5,15 @@ networks:
     driver: bridge
   
 volumes:
-  minio_data:
+  rustfs_data:
   redis_data:
   qdrant_data:
 
 services:
   api:
     build:
-      context: ./services/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/api/Dockerfile
     container_name: eade-api
     env_file: .env
     ports:
@@ -22,12 +22,12 @@ services:
       - ./services/api/app:/app/app # dev hot-reload only; drop in prod images
     command: uv run --frozen --no-dev uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     depends_on:
-      minio:
+      rustfs:
         condition: service_healthy
       redis:
         condition: service_healthy
       qdrant:
-        condition: service_started
+        condition: service_healthy
     networks:
       - eade-network
     healthcheck:
@@ -37,29 +37,38 @@ services:
       retries: 3
       start_period: 20s
 
-  minio:
-    image: minio/minio:latest
-    container_name: eade-minio
-    command: server /data --console-address ":9001"
+  rustfs:
+    # MinIO CE is EOL (images pulled from registries, Sept 2026). RustFS is the
+    # maintained Apache-2.0 successor — S3-compatible API, SDK unchanged.
+    image: rustfs/rustfs:1.0.6
+    container_name: eade-rustfs
+    security_opt:
+      - "no-new-privileges:true"
+    restart: unless-stopped
+    environment:
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY}
+      RUSTFS_VOLUMES: /data
     ports:
       - "9000:9000" # S3 API
-      - "9001:9001" # Web Console
-    environment:
-      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      - "9001:9001" # Web Console (served under /rustfs/console/)
     volumes:
-      - minio_data:/data
+      - rustfs_data:/data
     networks:
       - eade-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      # /health/ready returns 503 until storage+IAM are up; use 127.0.0.1, not localhost
+      test: ["CMD", "sh", "-c", "curl -fsS http://127.0.0.1:9000/health/ready"]
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 6 
+      start_period: 15s
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.20.2
     container_name: eade-qdrant
     ports:
       - "6333:6333" # REST API
@@ -69,7 +78,8 @@ services:
     networks:
       - eade-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      # qdrant image has no curl/wget — pure-bash probe over /dev/tcp
+      test: ["CMD", "bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/6333 && printf 'GET /healthz HTTP/1.0\\r\\n\\r\\n' >&3 && IFS= read -r line <&3 && [[ $$line == *' 200 '* ]]"]
       interval: 10s
       timeout: 5s
       retries: 5

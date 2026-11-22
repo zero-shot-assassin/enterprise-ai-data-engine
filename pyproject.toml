@@ -1,17 +1,31 @@
 [project]
 name = "enterprise-ai-data-engine"
 version = "0.1.0"
-description = "Add your description here"
+description = "Enterprise AI Data Engine"
 readme = "README.md"
 authors = [
     { name = "Clinton Nyaore", email = "cnyaore@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "fastapi>=0.165.0",
+    "minio>=7.2.20",
+    "pydantic-settings>=2.16.3",
+    "qdrant-client>=1.20.0",
+    "redis>=8.1.0",
+    "uvicorn[standard]>=0.54.0",
+]
 
-[project.scripts]
-enterprise-ai-data-engine = "enterprise_ai_data_engine:main"
+[tool.uv]
+package = false
 
-[build-system]
-requires = ["uv_build>=0.13.7,<0.14.0"]
-build-backend = "uv_build"
+[tool.pyright]
+extraPaths = ["services/api"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
