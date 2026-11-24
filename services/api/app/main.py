@@ -6,6 +6,8 @@ from minio import Minio
 from redis.asyncio import Redis
 from qdrant_client import QdrantClient
 
+from app.api.routes import documents
+
 from fastapi import (
     FastAPI,
     HTTPException,
@@ -87,6 +89,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.include_router(documents.router)
 
 
 @app.get("/health")

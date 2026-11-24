@@ -8,16 +8,38 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "celery>=5.7.0",
     "fastapi>=0.165.0",
     "minio>=7.2.20",
     "pydantic-settings>=2.16.3",
+    "python-multipart>=0.0.34",
     "qdrant-client>=1.20.0",
     "redis>=8.1.0",
     "uvicorn[standard]>=0.54.0",
 ]
 
+# Heavy ML deps for the Celery worker only — the API image stays slim.
+# Install in the worker stage via: uv sync --extra worker
+[project.optional-dependencies]
+worker = [
+    "docling>=2.152.0",
+    "torch>=2.15.0",
+    "torchvision>=0.20.0",
+]
+
 [tool.uv]
 package = false
+
+# torch/torchvision must come from the CPU-only PyTorch index on every platform.
+# (uv's torch-backend flag only applies to `uv pip`, NOT to lock/sync/add.)
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
 
 [tool.pyright]
 extraPaths = ["services/api"]
