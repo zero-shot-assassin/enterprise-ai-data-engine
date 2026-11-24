@@ -14,6 +14,7 @@ services:
     build:
       context: .
       dockerfile: services/api/Dockerfile
+      target: base
     container_name: eade-api
     env_file: .env
     ports:
@@ -101,3 +102,19 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+  
+  worker:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+      target: worker
+    container_name: eade-worker
+    env_file: .env
+    depends_on:
+      rustfs:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - eade-network
+    restart: unless-stopped

@@ -6,6 +6,7 @@ from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request, UploadFile
 from app.core.config import settings
+from app.worker.celery_app import celery_app
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
@@ -39,9 +40,12 @@ async def upload_document(request: Request, file: UploadFile):
         "content_type": file.content_type,
         "uploaded_at": datetime.now(timezone.utc).isoformat()
     }
-    await request.app.state.redis_client.lpush(
-        EXTRACTION_QUEUE,
-        json.dumps(task_message)
+    
+    # Send task to Celery
+    await asyncio.to_thread(
+        celery_app.send_task,
+        "extract_document",
+        kwargs=task_message
     )
 
     return {

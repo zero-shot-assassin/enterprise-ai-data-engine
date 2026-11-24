@@ -2,11 +2,12 @@ import logging
 import asyncio
 
 from contextlib import asynccontextmanager
-from minio import Minio
 from redis.asyncio import Redis
 from qdrant_client import QdrantClient
 
 from app.api.routes import documents
+from app.core.storage import get_minio_client
+
 
 from fastapi import (
     FastAPI,
@@ -35,13 +36,9 @@ async def retry(operation, max_retries=5):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Initializing services...")
-    # Initialize S3 client (minio SDK against RustFS — plain S3, vendor-neutral)
-    s3_client = Minio(
-        endpoint=settings.s3_endpoint,
-        access_key=settings.s3_access_key,
-        secret_key=settings.s3_secret_key,
-        secure=False
-    )
+    # Initialize S3 client
+    s3_client = get_minio_client()
+    
     bucket_name = settings.s3_bucket_raw
     
     # Check if bucket exists, create if not
