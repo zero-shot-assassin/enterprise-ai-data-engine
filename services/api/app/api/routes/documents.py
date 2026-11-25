@@ -1,6 +1,4 @@
-import json
 import uuid
-from datetime import datetime, timezone
 import asyncio
 from pathlib import Path
 
@@ -11,7 +9,6 @@ from app.worker.celery_app import celery_app
 router = APIRouter(prefix="/documents", tags=["documents"])
 
 ALLOWED_EXTENSIONS = {".pdf", ".docx", ".csv"}
-EXTRACTION_QUEUE = "extraction_queue"
 
 
 @router.post("/upload", status_code=202)
@@ -32,20 +29,15 @@ async def upload_document(request: Request, file: UploadFile):
         part_size=10*1024*1024,  # 10MB parts
     )
 
-    # 3. Build the task message and LPUSH it
-    task_message = {
-        "object_name": object_name,
-        "bucket": settings.s3_bucket_raw,
-        "file_name": Path(file.filename).name,
-        "content_type": file.content_type,
-        "uploaded_at": datetime.now(timezone.utc).isoformat()
-    }
-    
-    # Send task to Celery
+    # 3. Send task to Celery
     await asyncio.to_thread(
         celery_app.send_task,
         "extract_document",
-        kwargs=task_message
+        kwargs={
+            "object_name": object_name,
+            "bucket_name": settings.s3_bucket_raw,
+            "file_name": Path(file.filename).name
+        }
     )
 
     return {

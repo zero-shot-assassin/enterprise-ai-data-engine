@@ -17,19 +17,19 @@
 
 ### Day 1: The Local Infrastructure Stack
 
-- [ ]  Write `docker-compose.yml` with FastAPI, Redis, MinIO and Qdrant.
-- [ ]  Verify private Docker network communication.
+- [x]  Write `docker-compose.yml` with FastAPI, Redis, MinIO and Qdrant.
+- [x]  Verify private Docker network communication.
 
 ### Day 2: The Ingestion API & Object Storage
 
-- [ ]  Build a FastAPI `POST /upload` endpoint.
-- [ ]  Write file-upload logic to MinIO (Bronze layer).
-- [ ]  Push the extraction task to a Redis queue.
+- [x]  Build a FastAPI `POST /upload` endpoint.
+- [x]  Write file-upload logic to MinIO (Bronze layer).
+- [x]  Push the extraction task to a Redis queue.
 
 ### Day 3: The Asynchronous Docling Worker
 
-- [ ]  Set up a Celery worker container listening to Redis.
-- [ ]  Integrate Docling `DocumentConverter` to parse PDFs to Markdown.
+- [x]  Set up a Celery worker container listening to Redis.
+- [x]  Integrate Docling `DocumentConverter` to parse PDFs to Markdown.
 
 ### Day 4: Markdown Checkpointing
 

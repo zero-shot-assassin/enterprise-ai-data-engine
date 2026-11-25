@@ -25,11 +25,14 @@ async def retry(operation, max_retries=5):
     Retry an async operation with exponential backoff.
     """
     for attempt in range(max_retries):
+        logger.info(f"Attempt {attempt + 1} of {max_retries}")
         try:
             return await operation()
         except Exception as e:
+            logger.error(f"Attempt {attempt + 1} failed: {e}")
             if attempt == max_retries - 1:
-                raise e
+                logger.error(f"All {max_retries} attempts failed")
+                raise
             # Wait before retrying with exponential backoff
             await asyncio.sleep(2 ** attempt)
 

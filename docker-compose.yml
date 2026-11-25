@@ -8,6 +8,7 @@ volumes:
   rustfs_data:
   redis_data:
   qdrant_data:
+  hf_cache:
 
 services:
   api:
@@ -109,10 +110,32 @@ services:
       dockerfile: services/api/Dockerfile
       target: worker
     container_name: eade-worker
+    volumes:
+      - ./services/api/app:/app/app
+      - hf_cache:/root/.cache/huggingface # persist docling models across recreation
     env_file: .env
     depends_on:
       rustfs:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - eade-network
+    restart: unless-stopped
+
+  flower:
+    build:
+      context: .
+      dockerfile: services/api/Dockerfile
+      target: base                # flower is a core dep — slim image suffices
+    container_name: eade-flower
+    volumes:
+      - ./services/api/app:/app/app
+    ports:
+      - "5555:5555"
+    env_file: .env
+    command: uv run --no-sync celery -A app.worker.celery_app flower --port=5555
+    depends_on:
       redis:
         condition: service_healthy
     networks:
