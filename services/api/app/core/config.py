@@ -11,5 +11,6 @@ class Settings(BaseSettings):
     qdrant_host: str = "qdrant"
     qdrant_port: int = 6333
     s3_bucket_processed: str = "processed-markdown"
+    embedding_model: str = "all-MiniLM-L6-v2"
 
 settings = Settings() # type: ignore

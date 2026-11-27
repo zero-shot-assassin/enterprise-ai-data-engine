@@ -44,14 +44,14 @@
 
 ### Day 6: Embeddings & Qdrant Upsert
 
-- [ ]  Generate local vector embeddings, for example with `all-MiniLM-L6-v2`.
-- [ ]  Bulk-upsert chunks and metadata payloads into Qdrant.
+- [x]  Generate local vector embeddings, for example with `all-MiniLM-L6-v2`.
+- [x]  Bulk-upsert chunks and metadata payloads into Qdrant.
 
 ### Day 7: The Retrieval API & End-to-End Testing
 
-- [ ]  Build a FastAPI `GET /search` endpoint.
-- [ ]  Implement payload-filtered Qdrant vector search.
-- [ ]  Test the full path: upload PDF → process → search.
+- [x]  Build a FastAPI `GET /search` endpoint.
+- [x]  Implement payload-filtered Qdrant vector search.
+- [x]  Test the full path: upload PDF → process → search.
 
 ## 🌊 Week 2: Orchestration & the AI Lakehouse
 

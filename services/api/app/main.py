@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from redis.asyncio import Redis
 from qdrant_client import QdrantClient
 
-from app.api.routes import documents
+from app.api.routes import documents, search
 from app.core.storage import get_minio_client
 
 
@@ -90,6 +90,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(documents.router)
+app.include_router(search.router)
 
 
 @app.get("/health")
