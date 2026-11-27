@@ -25,6 +25,7 @@ dependencies = [
 [project.optional-dependencies]
 worker = [
     "docling>=2.152.0",
+    "langchain-text-splitters>=1.2.0",
     "torch>=2.15.0",
     "torchvision>=0.20.0",
 ]

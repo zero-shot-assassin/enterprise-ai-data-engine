@@ -33,13 +33,14 @@
 
 ### Day 4: Markdown Checkpointing
 
-- [ ]  Update the worker to save Docling Markdown back to MinIO in the `processed-markdown` bucket.
+- [x]  Update the worker to save Docling Markdown back to MinIO in the `processed-markdown` bucket.
 
 ### Day 5: Structural Chunking
 
-- [ ]  Write a script to pull Markdown from MinIO.
-- [ ]  Split by headers using `MarkdownHeaderTextSplitter`, preserving tables.
-- [ ]  Attach rich metadata—source, date and chunk type—to each segment.
+- [x]  Create `app/worker/chunking.py` with chunking logic and `__main__` entry point.
+- [x]  Split by headers using `MarkdownHeaderTextSplitter`, preserving tables.
+- [x]  Attach rich metadata—source, date and chunk type—to each segment.
+- [x]  Write chunks to `processed-chunks` bucket as `.chunks.jsonl`.
 
 ### Day 6: Embeddings & Qdrant Upsert
 

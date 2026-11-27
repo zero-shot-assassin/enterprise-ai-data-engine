@@ -10,5 +10,6 @@ class Settings(BaseSettings):
     redis_url: str = "redis://redis:6379/0"
     qdrant_host: str = "qdrant"
     qdrant_port: int = 6333
+    s3_bucket_processed: str = "processed-markdown"
 
 settings = Settings() # type: ignore
